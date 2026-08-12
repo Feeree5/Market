@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سوبرماركت أونلاين - التسوق السريع</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #ff6b00;
+      --bg-dark: #121212;
+      --card-bg: rgba(30, 30, 30, 0.9);
+      --text: #ffffff;
+      --border: #333333;
+      --danger: #dc3545;
+      --success: #28a745;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+
+    body {
+      background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)),
+                  url('https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1920&q=80') center/cover fixed no-repeat;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    header h1 { color: var(--primary); font-size: 2rem; }
+
+    .tabs-nav {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .section-page {
+      display: none;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .section-page.active { display: block; }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .menu-card {
+      background: rgba(45, 45, 45, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+    }
+
+    .product-img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #222;
+    }
+
+    .item-info h3 { font-size: 1rem; margin-bottom: 5px; }
+
+    .item-price {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .stock-badge {
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    .in-stock { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+    .out-stock { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qty-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .qty-btn:disabled { background: #555; cursor: not-allowed; }
+
+    .qty-input {
+      width: 50px;
+      height: 32px;
+      text-align: center;
+      background: #222;
+      border: 1px solid var(--border);
+      color: white;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(20, 20, 20, 0.95);
+      border-top: 2px solid var(--primary);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+
+    .total-price { font-size: 1.2rem; font-weight: 800; }
+    .total-price span { color: var(--primary); }
+
+    .action-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #222;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .delivery-animation-box {
+      text-align: center;
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+    }
+
+    .delivery-track {
+      width: 100%;
+      height: 40px;
+      border-bottom: 2px dashed var(--primary);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .delivery-bike {
+      font-size: 2rem;
+      position: absolute;
+      bottom: 0;
+      animation: driveBike 3s infinite linear;
+    }
+
+    @keyframes driveBike {
+      0% { right: -50px; }
+      100% { right: 100%; }
+    }
+
+    .order-code-badge {
+      background: var(--primary);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: inline-block;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🛒 السوبرماركت أونلاين</h1>
+  </header>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="showCategory('المشروبات', this)">🥤 المشروبات</button>
+    <button class="tab-btn" onclick="showCategory('السناكس', this)">🍿 السناكس</button>
+    <button class="tab-btn" onclick="showCategory('الألبان', this)">🧀 الألبان</button>
+    <button class="tab-btn" onclick="showCategory('المجمدات', this)">❄️ المجمدات</button>
+    <button class="tab-btn" onclick="showCategory('البقوليات والزيوت', this)">🌾 البقوليات والزيوت</button>
+    <button class="tab-btn" style="background:#444;" onclick="showSection('trackingSection', this)">🔍 الاستعلام عن طلب</button>
+  </div>
+
+  <div id="shopSection" class="section-page active">
+    <h2 id="currentCategoryTitle" style="margin-bottom:15px; color:var(--primary);">المشروبات</h2>
+    <div class="menu-grid" id="productsContainer">
+      <p style="text-align:center; grid-column: 1/-1;">جاري تحميل المنتجات...</p>
+    </div>
+  </div>
+
+  <div id="checkoutSection" class="section-page">
+    <h2>📝 بيانات توصيل الطلب</h2>
+    <br>
+    <form id="checkoutForm" onsubmit="handleOrderSubmit(event)">
+      <div class="form-group">
+        <label>الاسم بالكامل:</label>
+        <input type="text" id="custName" required placeholder="أدخل اسمك الكريم">
+      </div>
+      <div class="form-group">
+        <label>العنوان بالتفصيل:</label>
+        <input type="text" id="custAddress" required placeholder="اسم الشارع - رقم المبنى - الشقة">
+      </div>
+      <div class="form-group">
+        <label>رقم الموبايل:</label>
+        <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
+      </div>
+      <button type="submit" class="action-btn" style="width: 100%; background: var(--success); margin-top: 10px;">إرسال الطلب وإصدار الكود</button>
+    </form>
+  </div>
+
+  <div id="trackingSection" class="section-page">
+    <h2>🔍 الاستعلام عن حالة الطلبية</h2>
+    <br>
+    <div class="form-group">
+      <label>أدخل كود الطلب الخاص بك:</label>
+      <input type="text" id="searchOrderCode" placeholder="مثال: ORD-8492">
+    </div>
+    <button class="action-btn" style="width:100%" onclick="trackOrder()">بحث عن الطلب</button>
+    <div id="trackingResult" style="margin-top:20px;"></div>
+  </div>
+</div>
+
+<div class="bottom-bar" id="cartBar">
+  <div class="total-price">
+    الإجمالي: <span id="grandTotal">0</span> جنيه
+  </div>
+  <button class="action-btn" id="checkoutBtn" onclick="goToCheckout()">التالي: طلب المنتجات 🛒</button>
+</div>
+
+<script>
+  // رابط تطبيق Google Apps Script الخاص بك
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlQp0gple0zdY4hJocGdrabe76BHs1Tb2xBPs4JS_Hp5nOyP9SFM6IOJ9IqGuLnUXohA/exec";
+
+  let allProducts = [];
+  let cart = {}; 
+  let currentCategory = 'المشروبات';
+
+  // 1. جلب المنتجات وتحديث العرض ديناميكياً
+  async function fetchProducts(isAutoRefresh = false) {
+    try {
+      const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts`);
+      const newProducts = await res.json();
+      
+      allProducts = newProducts;
+      
+      // إعادة رسم المنتجات ديناميكياً
+      renderProducts();
+
+      // التحقق من توافق السلة مع المخزون المحدث
+      if (isAutoRefresh) {
+        validateCartWithStock();
+      }
+    } catch (e) {
+      if (!isAutoRefresh) {
+        document.getElementById('productsContainer').innerHTML = `<p style="text-align:center; grid-column: 1/-1;">تعذر تحميل المنتجات.</p>`;
+      }
+    }
+  }
+
+  // 2. مراجعة السلة تلقائياً عند تغيير المخزون في الخلفية
+  function validateCartWithStock() {
+    Object.keys(cart).forEach(prodName => {
+      const prod = allProducts.find(p => p.name === prodName);
+      if (!prod || prod.stock <= 0) {
+        delete cart[prodName];
+      } else if (cart[prodName].qty > prod.stock) {
+        cart[prodName].qty = prod.stock;
+      }
+    });
+    calculateTotal();
+  }
+
+  function showCategory(catName, btnElement) {
+    document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+    if(btnElement) btnElement.classList.add('active');
+    
+    currentCategory = catName;
+    document.getElementById('currentCategoryTitle').innerText = catName;
+    showSection('shopSection');
+    renderProducts();
+  }
+
+  function showSection(sectionId, btnElement) {
+    document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    if(btnElement) {
+      document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+    }
+
+    if(sectionId === 'checkoutSection' || sectionId === 'trackingSection') {
+      document.getElementById('cartBar').style.display = 'none';
+    } else {
+      document.getElementById('cartBar').style.display = 'flex';
+    }
+  }
+
+  function renderProducts() {
+    const container = document.getElementById('productsContainer');
+    const filtered = allProducts.filter(p => p.category === currentCategory);
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<p style="text-align:center; grid-column: 1/-1;">لا توجد منتجات في هذا القسم حالياً.</p>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    filtered.forEach(prod => {
+      const currentQty = cart[prod.name] ? cart[prod.name].qty : 0;
+      const isOut = prod.stock <= 0;
+
+      container.innerHTML += `
+        <div class="menu-card">
+          <img src="${prod.image || 'https://via.placeholder.com/150'}" class="product-img" alt="${prod.name}">
+          <div class="item-info">
+            <h3>${prod.name}</h3>
+            <p class="item-price">${prod.price} جنيه</p>
+            <span class="stock-badge ${isOut ? 'out-stock' : 'in-stock'}">
+              ${isOut ? 'غير متوفر حالياً' : 'متوفر بالمخزون: ' + prod.stock}
+            </span>
+          </div>
+          <div class="quantity-control">
+            <button class="qty-btn" ${isOut ? 'disabled' : ''} onclick="updateQty('${prod.name}', -1)">-</button>
+            <input type="number" class="qty-input" value="${currentQty}" readonly>
+            <button class="qty-btn" ${isOut ? 'disabled' : ''} onclick="updateQty('${prod.name}', 1)">+</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function updateQty(prodName, change) {
+    const prod = allProducts.find(p => p.name === prodName);
+    if (!prod) return;
+
+    const currentQty = cart[prodName] ? cart[prodName].qty : 0;
+    const newQty = currentQty + change;
+
+    if (newQty > prod.stock) {
+      alert(`عذراً! الكمية المطلوبة غير كافية بالمخزون. المتوفر حالياً هو: ${prod.stock}`);
+      return;
+    }
+
+    if (newQty <= 0) {
+      delete cart[prodName];
+    } else {
+      cart[prodName] = { product: prod, qty: newQty };
+    }
+
+    renderProducts();
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    let grandTotal = 0;
+    Object.values(cart).forEach(item => {
+      grandTotal += item.product.price * item.qty;
+    });
+    document.getElementById('grandTotal').innerText = grandTotal;
+  }
+
+  function goToCheckout() {
+    if (Object.keys(cart).length === 0) {
+      alert("برجاء اختيار منتج واحد على الأقل قبل متابعة الطلب!");
+      return;
+    }
+    showSection('checkoutSection');
+  }
+
+  async function handleOrderSubmit(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('custName').value;
+    const address = document.getElementById('custAddress').value;
+    const phone = document.getElementById('custPhone').value;
+    const orderCode = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+
+    const items = Object.values(cart).map(i => ({
+      name: i.product.name,
+      qty: i.qty,
+      price: i.product.price,
+      total: i.qty * i.product.price
+    }));
+
+    const totalMoney = items.reduce((acc, i) => acc + i.total, 0);
+
+    const payload = {
+      orderCode,
+      name,
+      address,
+      phone,
+      items,
+      totalMoney,
+      date: new Date().toISOString()
+    };
+
+    alert(`تم إرسال طلبك بنجاح!\nكود الطلب الخاص بك هو: ${orderCode}`);
+
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    cart = {};
+    calculateTotal();
+    document.getElementById('searchOrderCode').value = orderCode;
+    showSection('trackingSection');
+    trackOrder();
+
+    // تحديث المنتجات والمخزون فوراً
+    fetchProducts(true);
+  }
+
+  async function trackOrder() {
+    const code = document.getElementById('searchOrderCode').value.trim();
+    const resDiv = document.getElementById('trackingResult');
+
+    if (!code) {
+      resDiv.innerHTML = `<p style="color:var(--danger)">يرجى إدخال كود الطلب!</p>`;
+      return;
+    }
+
+    resDiv.innerHTML = `<p>جاري الاستعلام عن حالة الطلب...</p>`;
+
+    try {
+      const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=trackOrder&code=${code}`);
+      const data = await res.json();
+
+      if (!data.found) {
+        resDiv.innerHTML = `<p style="color:var(--danger)">لم يتم العثور على طلب بهذا الكود!</p>`;
+        return;
+      }
+
+      let statusHTML = '';
+      if (data.status === 'مقبول') {
+        statusHTML = `
+          <div class="delivery-animation-box">
+            <h3 style="color:var(--success)">في طريقها إليك بسرعة! 🚴‍♂️</h3>
+            <div class="delivery-track">
+              <div class="delivery-bike">🛵</div>
+            </div>
+            <p>طلبك مقبول وهو الآن مع مندوب التوصيل.</p>
+          </div>
+        `;
+      } else if (data.status === 'مرفوض') {
+        statusHTML = `
+          <div style="background:rgba(220,53,69,0.2); padding:20px; border-radius:12px; text-align:center;">
+            <h3 style="color:var(--danger)">تم رفض الطلبية ❌</h3>
+            <p>يرجى إعادة الطلب مرة أخرى أو التواصل معنا.</p>
+          </div>
+        `;
+      } else {
+        statusHTML = `
+          <div style="background:rgba(255,107,0,0.2); padding:20px; border-radius:12px; text-align:center;">
+            <h3 style="color:var(--primary)">جاري استقبال طلبيتك... ⏳</h3>
+            <p>طلبك قيد المراجعة الآن من قبل إدارة السوبرماركت.</p>
+          </div>
+        `;
+      }
+
+      resDiv.innerHTML = `
+        <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #444;">
+          <p>كود الطلب: <span class="order-code-badge">${data.orderCode}</span></p>
+          <p>اسم العميل: ${data.name}</p>
+          <p>الإجمالي: ${data.totalMoney} جنيه</p>
+          ${statusHTML}
+        </div>
+      `;
+    } catch(e) {
+      resDiv.innerHTML = `<p style="color:var(--danger)">حدث خطأ أثناء الاستعلام.</p>`;
+    }
+  }
+
+  // التحميل الأولي عند فتح الصفحة
+  fetchProducts();
+
+  // المزامنة والتحديث التلقائي الديناميكي للمخزون كل 5 ثوانٍ بدون إعادة تحميل
+  setInterval(() => {
+    fetchProducts(true);
+  }, 5000);
+</script>
+</body>
+</html>
