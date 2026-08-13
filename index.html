@@ -235,7 +235,7 @@
   </style>
 </head>
 <body>
-
+<audio id="successSound" src="ok.mp3" preload="auto"></audio>
 <div class="container">
   <header>
     <h1>🛒 السوبرماركت أونلاين</h1>
@@ -433,6 +433,14 @@
       alert("برجاء اختيار منتج واحد على الأقل قبل متابعة الطلب!");
       return;
     }
+    
+    // تشغيل الموسيقى/الصوت عند التأكد من وجود منتج في السلة والانتقال
+    const sound = document.getElementById('successSound');
+    if (sound) {
+      sound.currentTime = 0; // إعادة الصوت من البداية عند كل اضغطة
+      sound.play().catch(e => console.log("تعذر تشغيل الصوت تلقائياً:", e));
+    }
+
     showSection('checkoutSection');
   }
 
